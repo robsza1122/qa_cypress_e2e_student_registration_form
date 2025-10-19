@@ -23,3 +23,8 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('assertFormValues', (formIndex, formData) => {
+  cy.contains(`tbody > :nth-child(${formIndex}) > :nth-child(2)`, formData)
+    .should('be.visible');
+});
