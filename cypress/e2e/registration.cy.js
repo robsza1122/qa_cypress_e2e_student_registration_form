@@ -1,7 +1,7 @@
 /// <reference types='cypress' />
 
 const { generateForm } = require('./generateForm');
-const { monthsNames } = require('./months');
+const { monthsNames } = require('../support/months');
 
 const {
   name,
@@ -35,7 +35,7 @@ const form = [
 
 describe('Student Registration page', () => {
   beforeEach(() => {
-    cy.visit('/');
+    cy.visit('/automation-practice-form');
   });
 
   it('should show appropriate data in modal window', () => {
@@ -84,7 +84,7 @@ describe('Student Registration page', () => {
       if (Object.keys(value)[0] === 'picture') {
         return;
       }
-      cy.assertFormValues(i + 1, ...Object.values(value));
+      cy.assertFormValues(i + 1, Object.values(value)[0]);
     });
   });
 });

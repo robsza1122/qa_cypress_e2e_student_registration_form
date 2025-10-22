@@ -1,5 +1,6 @@
 const { faker } = require('@faker-js/faker');
-const { range } = require('./range');
+const { range } = require('../support/range');
+const { subjects } = require('../support/subjects');
 
 function generateForm() {
   // name and lastName
@@ -13,39 +14,28 @@ function generateForm() {
   const randomGender = Math.floor(Math.random() * gendersArray.length);
   const gender = gendersArray[randomGender];
   // phoneNumber
-  const phoneNumber = String(Math.floor(Math.random() * 10000000000));
+  const phoneNumber = faker.phone.number('##########');
   // dateOfBirth
   const months = range(1, 12, 1);
   const randomMonthIndex = Math.floor(Math.random() * months.length);
-  const years = range(1925, 2026, 1);
+  const years = range(1900, 2026, 1);
   const randomYearIndex = Math.floor(Math.random() * years.length);
   const randomYear = years[randomYearIndex];
   const days = range(1, 31, 1);
   const randomDaysIndex = Math.floor(Math.random() * days.length);
   const stringedDay = String(days[randomDaysIndex]);
-  const randomDay = days[randomDaysIndex].length === 2 ? `0${days[randomDaysIndex]}` : `00${days[randomDaysIndex]}`;
-  const dateOfBirth = `${String(randomYear)}-${randomMonthIndex + 1}-${String(randomDay)}`;
 
-  const getRandomDay = (chosenDay) => {
-    let day = '';
-    if (chosenDay.split('').length === 1) {
-      day = `.react-datepicker__day--00${chosenDay}`;
-    } else if (chosenDay.split('').length === 2) {
-      day = `.react-datepicker__day--0${chosenDay}`;
-    }
+  const day = `.react-datepicker__day--${stringedDay.padStart(3, '0')}`;
 
-    return day;
-  };
-
-  const day = getRandomDay(stringedDay);
-  // subjects
-  const subjects = faker.company.catchPhrase();
+  const randomSubjectsAmount = Math.floor(Math.random() * subjects.length);
   // currentAddress
   const currentAddress = faker.location.streetAddress({ useFullAddress: true });
   // state
   const states = ['NCR', 'Uttar Pradesh', 'Haryana', 'Rajasthan'];
-  const randomStateIndex = String(Math.floor(Math.random() * 4));
-  const state = states[randomStateIndex];
+  const randomStateIndex = Math.floor(Math.random() * states.length);
+  const state = states[randomStateIndex] === undefined
+    ? 'NCR'
+    : states[randomStateIndex];
   // city
 
   const assignCityToState = (stateName = 'NCR') => {
@@ -58,6 +48,8 @@ function generateForm() {
         return ['Karnal', 'Panipat'];
       case 'Rajasthan':
         return ['Jaipur', 'Jaiselmer'];
+      default:
+        return [];
     }
   };
 
@@ -70,9 +62,8 @@ function generateForm() {
     email,
     gender,
     phoneNumber,
-    dateOfBirth,
     randomYear,
-    subjects,
+    randomSubjectsAmount,
     randomMonthIndex,
     randomDaysIndex,
     randomCityIndex,
@@ -80,7 +71,6 @@ function generateForm() {
     day,
     currentAddress,
     states,
-    state,
     cities
   };
 }

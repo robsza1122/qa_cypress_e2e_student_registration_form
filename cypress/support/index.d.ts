@@ -2,6 +2,6 @@
 
 declare namespace Cypress {
     interface Chainable<Subject> {
-        assertFormValues(formIndex: number, formData: string | null): Chainable<any>
-    }
+        assertFormValues(formIndex: number, formData: string): Chainable<any>
+}
 }
