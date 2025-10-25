@@ -2,6 +2,8 @@
 
 const { generateForm } = require('./generateForm');
 const { monthsNames } = require('../support/months');
+const { subjects } = require('../support/subjects');
+const { getRandomLetter } = require('../support/letters');
 
 const {
   name,
@@ -15,25 +17,28 @@ const {
   randomMonthIndex,
   randomCityIndex,
   randomStateIndex,
+  randomHobbiesIndex,
   currentAddress,
   states,
   cities
 } = generateForm();
 
-const form = [
-  { StudentName: `${name} ${lastName}` },
-  { StudentEmail: email },
-  { gender },
-  { mobile: phoneNumber },
-  { dateOfBirth: `${randomDaysIndex + 1} ${monthsNames[randomMonthIndex]},${randomYear}` },
-  { subjects: 'English, Maths' },
-  { hobbies: 'Sports' },
-  { picture: null },
-  { address: currentAddress },
-  { stateAndCity: `${states[randomStateIndex]} ${cities[randomCityIndex]}` }
-];
-
 describe('Student Registration page', () => {
+  const chosenSubjects = [];
+  const chosenHobbies = [];
+
+  const form = [
+    { StudentName: `${name} ${lastName}` },
+    { StudentEmail: email },
+    { gender },
+    { mobile: phoneNumber },
+    { dateOfBirth: `${randomDaysIndex + 1} ${monthsNames[randomMonthIndex]},${randomYear}` },
+    { subjects: chosenSubjects.join(', ') },
+    { hobbies: chosenHobbies },
+    { picture: null },
+    { address: currentAddress },
+    { stateAndCity: `${states[randomStateIndex]} ${cities[randomCityIndex]}` }
+  ];
   beforeEach(() => {
     cy.visit('/automation-practice-form');
   });
@@ -49,17 +54,41 @@ describe('Student Registration page', () => {
       .click();
     cy.get('#userNumber')
       .type(phoneNumber);
-    cy.get('.subjects-auto-complete__value-container')
-      .type('e');
-    cy.get('#react-select-2-option-0')
-      .click();
-    cy.get('.subjects-auto-complete__value-container')
-      .type('s');
-    cy.get('#react-select-2-option-1')
-      .click();
+    cy.chooseRandomHobbies(String(randomHobbiesIndex), chosenHobbies);
+    subjects.forEach((subject) => {
+      cy.log(`looking for subject: ${subject}`);
+      cy.get('.subjects-auto-complete__value-container')
+        .type(getRandomLetter());
 
-    cy.contains('.custom-control-label', 'Sports')
-      .click();
+      cy.get('.subjects-auto-complete__value-container')
+        .then(() => {
+          cy.get('body').then(($body) => {
+            if ($body.find('.subjects-auto-complete__menu-list').length > 0) {
+              cy.get('.subjects-auto-complete__menu-list')
+                .find('div')
+                .first()
+                .invoke('text')
+                .then((optionText) => {
+                  cy.log(`Option text: ${optionText}`);
+                  const trimmed = optionText.trim();
+                  if (!chosenSubjects.includes(trimmed)) {
+                    chosenSubjects.push(trimmed);
+                    cy.get('.subjects-auto-complete__menu-list')
+                      .find('div')
+                      .first()
+                      .click();
+                    cy.log(`Added unique subject: ${trimmed}`);
+                  }
+                });
+            } else {
+              cy.get('.subjects-auto-complete__value-container input')
+                .type('{backspace}');
+            }
+          });
+        });
+
+      return chosenSubjects;
+    });
     cy.get('#currentAddress')
       .type(currentAddress);
     cy.get('#state')
@@ -84,7 +113,14 @@ describe('Student Registration page', () => {
       if (Object.keys(value)[0] === 'picture') {
         return;
       }
-      cy.assertFormValues(i + 1, Object.values(value)[0]);
+
+      if (Object.keys(value)[0] === 'subjects') {
+        Object.values(value)[0].split(', ').forEach((subject) => {
+          cy.assertFormValues(i + 1, subject);
+        });
+      } else {
+        cy.assertFormValues(i + 1, Object.values(value)[0]);
+      }
     });
   });
 });

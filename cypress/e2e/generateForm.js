@@ -28,6 +28,8 @@ function generateForm() {
   const day = `.react-datepicker__day--${stringedDay.padStart(3, '0')}`;
 
   const randomSubjectsAmount = Math.floor(Math.random() * subjects.length);
+  // hobbies
+  const randomHobbiesIndex = Math.floor(Math.random() * 3);
   // currentAddress
   const currentAddress = faker.location.streetAddress({ useFullAddress: true });
   // state
@@ -68,6 +70,7 @@ function generateForm() {
     randomDaysIndex,
     randomCityIndex,
     randomStateIndex,
+    randomHobbiesIndex,
     day,
     currentAddress,
     states,
